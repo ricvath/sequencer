@@ -315,6 +315,7 @@ export default function Sequencer() {
                   relative h-12 w-12 rounded-r-full
                   transition-all duration-150
                   ${!active && currentStep === index ? 'border-[3px]' : 'border-black/10'}
+                  ${!active ? 'bg-black/5' : ''}
                 `}
                 style={{
                   borderColor: active 
@@ -356,7 +357,9 @@ export default function Sequencer() {
                 }}
                 onClick={() => {
                   setActiveTrack(index)
-                  playTone(index)
+                  if (!isPlaying) {
+                    playTone(index)
+                  }
                 }}
               >
                 {/* Pad Number
