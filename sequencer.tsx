@@ -315,7 +315,7 @@ export default function Sequencer() {
                   relative h-12 w-12 rounded-r-full
                   transition-all duration-150
                   ${!active && currentStep === index ? 'border-[3px]' : 'border-black/10'}
-                  ${!active ? 'bg-black/5' : ''}
+                  ${!active ? 'bg-gray-50' : ''}
                 `}
                 style={{
                   borderColor: active 
