@@ -25,6 +25,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip"
+import Head from "next/head"
 
 const STEPS = 16
 const LYDIAN_SCALE = [
@@ -299,230 +300,183 @@ export default function Sequencer() {
     }, 2000)
   }
 
+  // Add a useEffect to handle viewport height for mobile browsers
+  useEffect(() => {
+    // Fix for mobile viewport height issues
+    const setVH = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+    
+    setVH();
+    window.addEventListener('resize', setVH);
+    
+    return () => {
+      window.removeEventListener('resize', setVH);
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="p-6 max-w-xl">
-        {/* Sequencer Grid */}
-        <div className="grid grid-cols-8 gap-2 mb-3">
-          {sequences[activeTrack].map((active, index) => (
-            <div
-              key={index}
-              className="flex">
-              <Checkbox
-                checked={active}
-                onCheckedChange={() => toggleStep(index)}
-                className={`
-                  relative h-12 w-12 rounded-r-full
-                  transition-all duration-150
-                  ${!active && currentStep === index ? 'border-[3px]' : 'border-black/10'}
-                  ${!active ? 'bg-gray-50' : ''}
-                `}
-                style={{
-                  borderColor: active 
-                    ? "transparent" 
-                    : currentStep === index 
-                      ? TRACK_COLORS[activeTrack]
-                      : undefined,
-                  backgroundColor: active ? TRACK_COLORS[activeTrack] : undefined
-                }}
-              />
-            </div>
-          ))}
-        </div>
-
-        {/* Modified Tone Trigger Buttons */}
-        <div className="grid grid-cols-8 gap-2 mb-3">
-          {tones.map((_, index) => {
-            const hasSequence = sequences[index].some(step => step)
-            const isCurrentlyPlaying = isTrackPlaying(index)
-            const isActive = activeTrack === index
-            
-            return (
-              <Button
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="theme-color" content="#ffffff" />
+      </Head>
+      <div className="min-h-screen w-full flex items-center justify-center bg-white sm:bg-gray-50 sm:p-0" 
+           style={{ minHeight: 'calc(var(--vh, 1vh) * 100)' }}>
+        <div className="flex flex-col justify-between w-full h-full sm:h-auto sm:max-w-xl sm:p-6 p-4 gap-3 bg-white sm:rounded-lg sm:shadow-md">
+          
+          {/* Sequencer Grid */}
+          <div className="grid grid-cols-4 sm:grid-cols-8 items-stretch justify-stretch gap-3 h-full">
+            {sequences[activeTrack].map((active, index) => (
+              <div
                 key={index}
-                variant={isActive ? "default" : "outline"}
-                className={`
-                  relative w-12 h-12 rounded-l-full
-                  transition-all duration-150
-                  border-1
-                  hover:scale-[1.02]
-                  border-black/10
-                  ${isActive ? 'scale-[1.02] text-white' : ''}
-                  ${isCurrentlyPlaying ? 'border-[4px]' : ''}
-                `}
-                style={{
-                  borderColor: isCurrentlyPlaying ? TRACK_COLORS[index] : undefined,
-                  backgroundColor: isActive ? TRACK_COLORS[index] : undefined,
-                  transition: 'all 0.15s ease'
-                }}
-                onClick={() => {
-                  setActiveTrack(index)
-                  if (!isPlaying) {
-                    playTone(index)
-                  }
-                }}
-              >
-                {/* Pad Number
-                <span className="absolute top-1 left-2 text-xs">
-                  {index + 1}
-                </span>
-                */}
-
-                {/* Note Display */}
-                <span className="text-xs">
-                  {/*{selectedNotes[index]}*/}
-                  {index + 1}
-                </span>
-              
-
-                {/* Settings Dropdown 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <div 
-                      className="absolute top-1 right-1 p-2 cursor-pointer"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <Settings className="h-3 w-3" />
-                    </div>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    {LYDIAN_SCALE.map((noteData) => (
-                      <DropdownMenuItem
-                        key={noteData.note}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleNoteSelect(index, noteData.note)
-                        }}
-                        disabled={selectedNotes.includes(noteData.note) && selectedNotes[index] !== noteData.note}
-                      >
-                        {noteData.note}
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                */}
-              </Button>
-            )
-          })}
-        </div>
-        {/*
-        {/* Controls Accordion
-        <Accordion type="single" collapsible className="mb-4">
-          <AccordionItem value="controls">
-            <AccordionTrigger className="text-lg">Controls</AccordionTrigger>
-            <AccordionContent>
-              {/* BPM Control
-              <div className="flex items-center mb-4">
-                <div className="bg-black text-green-500 font-mono text-xl p-2 mr-4 w-20 text-center">{bpm}</div>
-                <Slider
-                  value={[bpm]}
-                  onValueChange={(value) => setBpm(value[0])}
-                  min={60}
-                  max={240}
-                  step={1}
-                  className="w-64"
+                className="touch-manipulation h-16 sm:h-12">
+                <Checkbox
+                  checked={active}
+                  onCheckedChange={() => toggleStep(index)}
+                  className={`
+                    relative rounded-smm w-full h-16 sm:h-12
+                    transition-all duration-150
+                    ${!active && currentStep === index ? 'border-[3px]' : 'border-black/10'}
+                    ${!active ? 'bg-gray-50' : ''}
+                    active:scale-95
+                  `}
+                  style={{
+                    borderColor: active 
+                      ? "transparent" 
+                      : currentStep === index 
+                        ? TRACK_COLORS[activeTrack]
+                        : undefined,
+                    backgroundColor: active ? TRACK_COLORS[activeTrack] : undefined
+                  }}
                 />
-                <span className="ml-2 font-mono">BPM</span>
               </div>
-
-              {/* Reverb Control
-              <div className="flex items-center mb-4">
-                <div className="bg-black text-green-500 font-mono text-xl p-2 mr-4 w-20 text-center">
-                  {(reverb * 100).toFixed(0)}%
-                </div>
-                <Slider
-                  value={[reverb * 100]}
-                  onValueChange={(value) => setReverb(value[0] / 100)}
-                  min={0}
-                  max={100}
-                  step={1}
-                  className="w-64"
-                />
-                <span className="ml-2 font-mono">REVERB</span>
-              </div>
-
-              {/* Delay Control
-              <div className="flex items-center mb-4">
-                <div className="bg-black text-green-500 font-mono text-xl p-2 mr-4 w-20 text-center">
-                  {(delay * 100).toFixed(0)}%
-                </div>
-                <Slider
-                  value={[delay * 100]}
-                  onValueChange={(value) => setDelay(value[0] / 100)}
-                  min={0}
-                  max={100}
-                  step={1}
-                  className="w-64"
-                />
-                <span className="ml-2 font-mono">DELAY</span>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-        */}
-
-        {/* Updated buttons section with volume control */}
-        <TooltipProvider>
-          <div className="grid grid-cols-4 gap-2 w-1/2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={() => setIsPlaying(!isPlaying)} className="w-12 h-12 rounded-l-full">
-                  {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>{isPlaying ? 'Pause' : 'Play'}</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleRandom} variant="outline" className="w-12 h-12 rounded-l-full">
-                  <Shuffle className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Random Pattern</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button onClick={handleClear} variant="outline" className="w-12 h-12 rounded-l-full">
-                  <FileX className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent><p>Clear All</p></TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <DropdownMenu open={volumeOpen} onOpenChange={setVolumeOpen}>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-12 h-12 rounded-l-full">
-                        <Volume2 className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent 
-                      className="flex items-center p-4 h-12 shadow-none border rounded-r-full" 
-                      side="right"
-                      sideOffset={8}
-                    >
-                      <div onMouseLeave={() => setVolumeOpen(false)}>
-                      <Slider
-                        value={[masterVolume * 100]}
-                        onValueChange={(value) => setMasterVolume(value[0] / 100)}
-                        min={0}
-                        max={100}
-                        step={1}
-                        className="w-24"
-                      />
-                      </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-              </TooltipTrigger>
-              <TooltipContent><p>Volume</p></TooltipContent>
-            </Tooltip>
+            ))}
           </div>
-        </TooltipProvider>
+
+          {/* Modified Tone Trigger Buttons */}
+          <div className="grid grid-cols-4 sm:grid-cols-8 items-stretch justify-stretch gap-3 h-full">
+            {tones.map((_, index) => {
+              const hasSequence = sequences[index].some(step => step)
+              const isCurrentlyPlaying = isTrackPlaying(index)
+              const isActive = activeTrack === index
+              
+              return (
+                <Button
+                  key={index}
+                  variant={isActive ? "default" : "outline"}
+                  className={`
+                    relative h-16 sm:h-12 w-full rounded-sm
+                    transition-all duration-150
+                    border-1
+                    hover:scale-[1.02]
+                    active:scale-95
+                    border-black/10
+                    touch-manipulation
+                    ${isActive ? 'scale-[1.02] text-white' : ''}
+                    ${isCurrentlyPlaying ? 'border-[4px]' : ''}
+                  `}
+                  style={{
+                    borderColor: isCurrentlyPlaying ? TRACK_COLORS[index] : undefined,
+                    backgroundColor: isActive ? TRACK_COLORS[index] : undefined,
+                    transition: 'all 0.15s ease'
+                  }}
+                  onClick={() => {
+                    setActiveTrack(index)
+                    if (!isPlaying) {
+                      playTone(index)
+                    }
+                  }}
+                >
+                  {/* Note Display */}
+                  <span className="text-sm font-medium">
+                    {index + 1}
+                  </span>
+                </Button>
+              )
+            })}
+          </div>
+
+          {/* Updated buttons section with volume control */}
+          <TooltipProvider>
+            <div className="grid grid-cols-4 sm:grid-cols-8 items-stretch justify-stretch gap-3 mt-auto">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={() => setIsPlaying(!isPlaying)} 
+                    className={`h-16 sm:h-12 w-full rounded-sm touch-manipulation active:scale-95`}
+                  >
+                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>{isPlaying ? 'Pause' : 'Play'}</p></TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={handleRandom} 
+                    variant="outline" 
+                    className="h-16 sm:h-12 w-full rounded-sm touch-manipulation active:scale-95"
+                  >
+                    <Shuffle className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Random Pattern</p></TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    onClick={handleClear} 
+                    variant="outline" 
+                    className="h-16 sm:h-12 w-full rounded-sm touch-manipulation active:scale-95"
+                  >
+                    <FileX className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent><p>Clear All</p></TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <DropdownMenu open={volumeOpen} onOpenChange={setVolumeOpen}>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="h-16 sm:h-12 w-full rounded-sm touch-manipulation active:scale-95"
+                        >
+                          <Volume2 className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent 
+                        className="flex items-center p-4 h-14 shadow-none border rounded-sm" 
+                        side="bottom"
+                        sideOffset={8}
+                      >
+                        <div onMouseLeave={() => setVolumeOpen(false)} onTouchEnd={() => setVolumeOpen(false)}>
+                        <Slider
+                          value={[masterVolume * 100]}
+                          onValueChange={(value) => setMasterVolume(value[0] / 100)}
+                          min={0}
+                          max={100}
+                          step={1}
+                          className="w-40 sm:w-32"
+                        />
+                        </div>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
+                </TooltipTrigger>
+                <TooltipContent><p>Volume</p></TooltipContent>
+              </Tooltip>
+            </div>
+          </TooltipProvider>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 
